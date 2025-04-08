@@ -12,7 +12,7 @@
 
     <artifactId>scx-jdbc-sqlite</artifactId>
     <packaging>jar</packaging>
-    <version>3.4.9</version>
+    <version>3.5.0</version>
 
     <name>SCX JDBC SQLite</name>
     <url>https://github.com/scx567888/scx-jdbc-sqlite</url>
