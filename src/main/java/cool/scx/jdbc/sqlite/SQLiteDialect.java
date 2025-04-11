@@ -184,5 +184,5 @@ public class SQLiteDialect implements Dialect {
     public String quoteIdentifier(String identifier) {
         return '"' + identifier + '"';
     }
-    
+
 }
