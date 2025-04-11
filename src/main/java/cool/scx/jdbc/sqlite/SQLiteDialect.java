@@ -2,9 +2,11 @@ package cool.scx.jdbc.sqlite;
 
 import cool.scx.jdbc.JDBCHelper;
 import cool.scx.jdbc.JDBCType;
-import cool.scx.jdbc.dialect.DDLBuilder;
 import cool.scx.jdbc.dialect.Dialect;
+import cool.scx.jdbc.mapping.Column;
 import cool.scx.jdbc.sqlite.type_handler.SQLiteLocalDateTimeTypeHandler;
+import cool.scx.jdbc.type_handler.TypeHandler;
+import cool.scx.jdbc.type_handler.TypeHandlerSelector;
 import org.sqlite.JDBC;
 import org.sqlite.SQLiteDataSource;
 import org.sqlite.core.CorePreparedStatement;
@@ -14,10 +16,15 @@ import org.sqlite.jdbc4.JDBC4PreparedStatement;
 import javax.sql.DataSource;
 import java.lang.System.Logger;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static cool.scx.common.util.StringUtils.notBlank;
 
 /**
  * SQLiteDialect
@@ -26,17 +33,18 @@ import java.time.LocalDateTime;
  * @version 0.0.1
  * @see <a href="https://www.sqlite.org/lang_createtable.html">https://www.sqlite.org/lang_createtable.html</a>
  */
-public class SQLiteDialect extends Dialect {
+public class SQLiteDialect implements Dialect {
 
     public static final Logger logger = System.getLogger(SQLiteDialect.class.getName());
     static final Field CoreStatement_sql = initCoreStatement_sql();
     static final Field CoreStatement_batch = initCoreStatement_batch();
     static final Field CorePreparedStatement_batchQueryCount = initCorePreparedStatement_batchQueryCount();
-    private static final SQLiteDDLBuilder SQLite_DDL_BUILDER = new SQLiteDDLBuilder();
     private static final org.sqlite.JDBC DRIVER = initDRIVER();
+    private final TypeHandlerSelector typeHandlerSelector;
 
     public SQLiteDialect() {
         // 注册自定义的 TypeHandler       
+        this.typeHandlerSelector = new TypeHandlerSelector();
         this.typeHandlerSelector.registerTypeHandler(LocalDateTime.class, new SQLiteLocalDateTimeTypeHandler());
     }
 
@@ -121,15 +129,15 @@ public class SQLiteDialect extends Dialect {
     }
 
     @Override
-    public DDLBuilder ddlBuilder() {
-        return SQLite_DDL_BUILDER;
-    }
-
-    @Override
     public DataSource createDataSource(String url, String username, String password, String[] parameters) {
         var sqLiteDataSource = new SQLiteDataSource();
         sqLiteDataSource.setUrl(url);
         return sqLiteDataSource;
+    }
+
+    @Override
+    public <T> TypeHandler<T> findTypeHandler(Type type) {
+        return typeHandlerSelector.findTypeHandler(type);
     }
 
     @Override
@@ -140,6 +148,41 @@ public class SQLiteDialect extends Dialect {
     @Override
     public String jdbcTypeToDialectDataType(JDBCType jdbcType) {
         return SQLiteDialectHelper.jdbcTypeToDialectDataType(jdbcType);
+    }
+
+    @Override
+    public String getDataTypeNameByJDBCType(JDBCType dataType) {
+        return SQLiteDialectHelper.jdbcTypeToDialectDataType(dataType);
+    }
+
+    @Override
+    public String getDataTypeDefinitionByName(String dataType, Integer length) {
+        //SQLite 的类型无需长度
+        return dataType;
+    }
+
+    /**
+     * 当前列对象通常的 DDL 如设置 字段名 类型 是否可以为空 默认值等 (建表语句片段 , 需和 specialDDL 一起使用才完整)
+     */
+    @Override
+    public List<String> getColumnConstraint(Column column) {
+        var list = new ArrayList<String>();
+        if (column.primary() && column.autoIncrement()) {
+            list.add("PRIMARY KEY AUTOINCREMENT");
+        }
+        list.add(column.notNull() || column.primary() ? "NOT NULL" : "NULL");
+        if (column.unique()) {
+            list.add("UNIQUE");
+        }
+        if (notBlank(column.defaultValue())) {
+            list.add("DEFAULT " + column.defaultValue());
+        }
+        return list;
+    }
+
+    @Override
+    public String quoteIdentifier(String identifier) {
+        return '"' + identifier + '"';
     }
 
 }
