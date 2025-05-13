@@ -101,7 +101,7 @@
 
     <properties>
 
-        <scx.version>3.6.2</scx.version>
+        <scx.version>3.7.0</scx.version>
         <sqlite-jdbc.version>3.48.0.0</sqlite-jdbc.version>
         <testng.version>7.10.2</testng.version>
 
