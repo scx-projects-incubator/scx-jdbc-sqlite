@@ -85,6 +85,13 @@
 
         <dependency>
             <groupId>cool.scx</groupId>
+            <artifactId>scx-jdbc-spy</artifactId>
+            <version>${scx.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>cool.scx</groupId>
             <artifactId>scx-logging</artifactId>
             <version>${scx.version}</version>
             <scope>test</scope>
