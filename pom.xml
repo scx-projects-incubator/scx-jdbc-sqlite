@@ -85,6 +85,13 @@
 
         <dependency>
             <groupId>cool.scx</groupId>
+            <artifactId>scx-jdbc-spy</artifactId>
+            <version>${scx.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>cool.scx</groupId>
             <artifactId>scx-logging</artifactId>
             <version>${scx.version}</version>
             <scope>test</scope>
@@ -101,7 +108,7 @@
 
     <properties>
 
-        <scx.version>3.8.0</scx.version>
+        <scx.version>3.8.5</scx.version>
         <sqlite-jdbc.version>3.48.0.0</sqlite-jdbc.version>
         <testng.version>7.10.2</testng.version>
 
