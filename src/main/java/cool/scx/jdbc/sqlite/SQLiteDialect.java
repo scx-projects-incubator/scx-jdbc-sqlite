@@ -7,6 +7,7 @@ import cool.scx.jdbc.mapping.Column;
 import cool.scx.jdbc.sqlite.type_handler.SQLiteLocalDateTimeTypeHandler;
 import cool.scx.jdbc.type_handler.TypeHandler;
 import cool.scx.jdbc.type_handler.TypeHandlerSelector;
+import dev.scx.reflect.TypeInfo;
 import org.sqlite.JDBC;
 import org.sqlite.SQLiteDataSource;
 import org.sqlite.core.CorePreparedStatement;
@@ -43,7 +44,7 @@ public class SQLiteDialect implements Dialect {
     private final TypeHandlerSelector typeHandlerSelector;
 
     public SQLiteDialect() {
-        // 注册自定义的 TypeHandler       
+        // 注册自定义的 TypeHandler
         this.typeHandlerSelector = new TypeHandlerSelector();
         this.typeHandlerSelector.registerTypeHandler(LocalDateTime.class, new SQLiteLocalDateTimeTypeHandler());
     }
@@ -136,7 +137,12 @@ public class SQLiteDialect implements Dialect {
     }
 
     @Override
-    public <T> TypeHandler<T> findTypeHandler(Type type) {
+    public <T> TypeHandler<T> findTypeHandler(Class<?> type) {
+        return typeHandlerSelector.findTypeHandler(type);
+    }
+
+    @Override
+    public <T> TypeHandler<T> findTypeHandler(TypeInfo type) {
         return typeHandlerSelector.findTypeHandler(type);
     }
 

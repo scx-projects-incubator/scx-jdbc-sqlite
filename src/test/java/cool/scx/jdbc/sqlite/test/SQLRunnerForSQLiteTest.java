@@ -1,6 +1,5 @@
 package cool.scx.jdbc.sqlite.test;
 
-import cool.scx.common.exception.ScxExceptionHelper;
 import cool.scx.common.util.ClassUtils;
 import cool.scx.common.util.FileUtils;
 import cool.scx.common.util.ObjectUtils;
@@ -11,8 +10,9 @@ import cool.scx.jdbc.sql.SQLRunner;
 import cool.scx.jdbc.sql.UpdateResult;
 import cool.scx.jdbc.sqlite.test.bean.Student;
 import cool.scx.jdbc.sqlite.test.bean.StudentRecord;
-import cool.scx.logging.ScxLoggerConfig;
-import cool.scx.logging.ScxLoggerFactory;
+import cool.scx.object.ScxObject;
+import dev.scx.logging.ScxLoggerConfig;
+import dev.scx.logging.ScxLogging;
 import org.sqlite.SQLiteDataSource;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -39,7 +39,7 @@ public class SQLRunnerForSQLiteTest {
     public static Path AppRoot;
 
     static {
-        ScxLoggerFactory.setConfig("ScxSpy", new ScxLoggerConfig().setLevel(DEBUG));
+        ScxLogging.setConfig("ScxSpy", new ScxLoggerConfig().setLevel(DEBUG));
         try {
             AppRoot = ClassUtils.getAppRoot(SQLRunnerForSQLiteTest.class);
             TempSQLite = AppRoot.resolve("temp").resolve("temp.sqlite");
@@ -58,7 +58,7 @@ public class SQLRunnerForSQLiteTest {
         test3();
         test4();
         test5();
-        // 太耗时 不执行       
+        // 太耗时 不执行
         // test6();
     }
 
@@ -113,10 +113,10 @@ public class SQLRunnerForSQLiteTest {
     public static void test3() {
         List<Student> query = sqlRunner.query(sql("select * from " + tableName), ofBeanList(Student.class));
         System.out.println("查询 使用 BeanList 总条数: " + query.size());
-        System.out.println("查询 使用 BeanList 第一条内容: " + ObjectUtils.toJson(query.get(0), ""));
+        System.out.println("查询 使用 BeanList 第一条内容: " + ScxObject.toJson(query.get(0) ));
         List<Map<String, Object>> query1 = sqlRunner.query(sql("select * from `t1`"), ofMapList());
         System.out.println("查询 使用 MapList 总条数: " + query1.size());
-        System.out.println("查询 使用 MapList 第一条内容: " + ObjectUtils.toJson(query1.get(0), ""));
+        System.out.println("查询 使用 MapList 第一条内容: " + ScxObject.toJson(query1.get(0)));
     }
 
     @Test
@@ -136,7 +136,7 @@ public class SQLRunnerForSQLiteTest {
                 sqlRunner.update(sql(sql, m));
             });
         } catch (Exception e) {
-            System.err.println("成功捕获到异常 : " + ScxExceptionHelper.getRootCause(e));
+            System.err.println("成功捕获到异常 : " + e);
         }
         List<StudentRecord> query2 = sqlRunner.query(sql("select * from " + tableName), ofBeanList(StudentRecord.class));
         System.out.println("回滚后总条数: " + query2.size());
